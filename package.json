@@ -3,8 +3,8 @@
   "version": "0.7.0-katelya",
   "private": true,
   "scripts": {
-    "dev": "npm run gen:runtime && npm run gen:manifest && next dev -H 0.0.0.0",
-    "build": "npm run gen:runtime && npm run gen:manifest && next build",
+    "dev": "node scripts/convert-config.js && node scripts/generate-manifest.js && next dev -H 0.0.0.0",
+    "build": "node scripts/convert-config.js && node scripts/generate-manifest.js && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "eslint src --fix && npm run format",
