@@ -133,11 +133,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '密码不能为空' }, { status: 400 });
     }
 
-    // 可能是站长，直接读环境变量
-    if (
-      username === process.env.USERNAME &&
-      password === process.env.AUTH_PASSWORD
-    ) {
+    // 站长登录逻辑优化：兼容 Upstash 模式下的管理员登录
+    // 只要用户名匹配 USERNAME 且密码匹配 AUTH_PASSWORD，即视为站长
+    const adminUser = process.env.USERNAME || 'admin';
+    const adminPass = process.env.AUTH_PASSWORD;
+
+    if (username === adminUser && password === adminPass) {
       // 验证成功，设置认证cookie
       const response = NextResponse.json({ ok: true });
       const cookieValue = await generateAuthCookie(
@@ -158,7 +159,8 @@ export async function POST(req: NextRequest) {
       });
 
       return response;
-    } else if (username === process.env.USERNAME) {
+    } else if (username === adminUser) {
+      // 如果尝试登录管理员账号但密码错误
       return NextResponse.json({ error: '用户名或密码错误' }, { status: 401 });
     }
 
