@@ -50,16 +50,17 @@ async function generateAuthCookie(
   includePassword = false
 ): Promise<string> {
   const authData: any = { role: role || 'user' };
+  const authPassword = process.env.AUTH_PASSWORD || '123456';
 
   // 只在需要时包含 password
   if (includePassword && password) {
     authData.password = password;
   }
 
-  if (username && process.env.AUTH_PASSWORD) {
+  if (username && authPassword) {
     authData.username = username;
     // 使用密码作为密钥对用户名进行签名
-    const signature = await generateSignature(username, process.env.AUTH_PASSWORD);
+    const signature = await generateSignature(username, authPassword);
     authData.signature = signature;
     authData.timestamp = Date.now(); // 添加时间戳防重放攻击
   }
