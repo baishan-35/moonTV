@@ -159,18 +159,7 @@ export async function POST(req: NextRequest) {
 
       return response;
     } else if (username === process.env.USERNAME) {
-      // 调试代码：返回环境变量状态以排查登录问题
-      // 注意：生产环境调试完成后应删除此逻辑
-      return NextResponse.json({ 
-        error: '用户名或密码错误',
-        debug: {
-          receivedUser: username,
-          expectedUser: process.env.USERNAME,
-          passMatch: password === process.env.AUTH_PASSWORD,
-          envPassLen: process.env.AUTH_PASSWORD?.length,
-          inputPassLen: password?.length
-        }
-      }, { status: 401 });
+      return NextResponse.json({ error: '用户名或密码错误' }, { status: 401 });
     }
 
     const config = await getConfig();
