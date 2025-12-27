@@ -1,67 +1,43 @@
-# KatelyaTV Deployment Report (Option 4: Vercel + Upstash)
+# KatelyaTV 部署报告
 
-## 1. Deployment Environment Configuration
-- **OS**: Windows (Local Preparation Environment)
-- **Runtime**: Node.js (v20.x or compatible)
-- **Package Manager**: pnpm (v10.12.4)
-- **Framework**: Next.js 14
-- **Target Architecture**: Vercel Serverless + Upstash Redis (Option 4)
+## 1. 部署概览
+- **项目**: KatelyaTV (MoonTV 分支)
+- **部署方案**: 方案四 (Vercel + Upstash)
+- **状态**: 准备好进行 Vercel 部署
+- **仓库地址**: `https://github.com/baishan-35/moonTV`
 
-## 2. Execution Steps & Key Modifications
+## 2. 环境准备 (本地)
+- **操作系统**: Windows
+- **Node.js**: 兼容
+- **包管理器**: pnpm
+- **已做更改**:
+    - 修复了 `package.json` 构建脚本以兼容 Windows 环境（解决 `'next' is not recognized` 错误）。
+    - 调整了 `next.config.js` 以避免文件锁定问题（本地构建禁用 `output: standalone`）。
+    - 配置了 `.env` 文件以集成 Upstash。
 
-### 2.1 Codebase Preparation
-- **Cloned Repository**: `https://github.com/katelya77/KatelyaTV`
-- **Installed Dependencies**: Used `pnpm install`.
-- **Environment Configuration**:
-  - Created `.env` file based on Option 4 requirements.
-  - **Note**: Set `NEXT_PUBLIC_STORAGE_TYPE=localstorage` temporarily for local verification to ensure the app runs without immediate Upstash credentials. The Upstash configuration fields are included as placeholders.
+## 3. 已执行的部署步骤
+1.  **代码库设置**: 克隆并安装了依赖项。
+2.  **构建验证**: 本地 `pnpm build` 成功通过。
+3.  **版本控制**:
+    - 修复了 git 远程连接问题。
+    - 强制推送干净的状态到 `origin/main`。
+4.  **数据库设置**: 已创建 Upstash Redis 实例。
 
-### 2.2 Critical Fixes & Tuning
-During the build process on Windows, two issues were encountered and resolved:
+## 4. 最终部署指南 (Vercel)
 
-1.  **Issue**: `EBUSY: resource busy or locked` during build.
-    - **Cause**: Windows file locking conflicts with Next.js `output: 'standalone'` mode.
-    - **Solution**: Temporarily commented out `output: 'standalone'` in `next.config.js`. This is safe for Vercel deployment as Vercel handles the build output automatically.
+要完成部署，请前往您的 Vercel 项目设置并添加以下 **环境变量**：
 
-2.  **Issue**: `'next' is not recognized as an internal or external command`.
-    - **Cause**: `npm run` inside `pnpm` scripts failed to resolve the `.bin` path correctly on Windows.
-    - **Solution**: Updated `package.json` build scripts to use direct `node` execution and `next` binary resolution.
-    - **Old Script**: `"build": "npm run gen:runtime && npm run gen:manifest && next build"`
-    - **New Script**: `"build": "node scripts/convert-config.js && node scripts/generate-manifest.js && next build"`
+| 变量名 | 值 |
+|--------------|-------|
+| `NEXT_PUBLIC_STORAGE_TYPE` | `upstash` |
+| `NEXT_PUBLIC_ENABLE_REGISTER` | `true` |
+| `USERNAME` | `admin` |
+| `PASSWORD` | *(您选择的密码)* |
+| `UPSTASH_URL` | `https://fast-egret-55145.upstash.io` |
+| `UPSTASH_TOKEN` | `AddpAAIncDFiZDc0MzcwNGIwNzM0YmExOTQ0MDE1MmM0MzY1YjY1M3AxNTUxNDU` |
 
-### 2.3 Build & Verification
-- **Command Executed**: `pnpm build`
-- **Result**: Build successful.
-- **Verification**:
-  - Started production server: `pnpm start`
-  - Health Check: `curl -I http://localhost:3000` -> **HTTP 307 Temporary Redirect** (Success).
-  - The application is running and redirecting correctly (likely to warning/setup page).
-
-## 3. Finalizing Option 4 Deployment (Vercel + Upstash)
-
-To complete the "Option 4" deployment as intended (Cloud-based):
-
-1.  **Push to GitHub**:
-    - Commit the changes (especially `package.json` fixes) and push to your own GitHub repository.
-
-2.  **Deploy to Vercel**:
-    - Log in to [Vercel](https://vercel.com).
-    - Import your GitHub repository.
-    - **Environment Variables**: Add the following variables (values from your `.env`):
-        - `USERNAME`: `admin`
-        - `PASSWORD`: `[Your Secure Password]`
-        - `NEXT_PUBLIC_STORAGE_TYPE`: `upstash` (IMPORTANT: Change from `localstorage`)
-        - `UPSTASH_URL`: `[Your Upstash URL]`
-        - `UPSTASH_TOKEN`: `[Your Upstash Token]`
-        - `NEXT_PUBLIC_ENABLE_REGISTER`: `true`
-
-3.  **Upstash Setup**:
-    - Go to [Upstash](https://upstash.com), create a Redis database, and get the URL/Token to fill in the steps above.
-
-4.  **Redeploy**:
-    - Click "Deploy" in Vercel.
-
-## 4. Verification Results
-- **Local Build**: ✅ PASSED
-- **Local Runtime**: ✅ PASSED (http://localhost:3000)
-- **Configuration**: ✅ READY (See `.env` file)
+## 5. 验证
+Vercel 构建完成后：
+1.  打开提供的 Vercel URL (例如 `https://moontv-xxx.vercel.app`)。
+2.  使用用户名 `admin` 和您的密码登录。
+3.  测试播放视频并将其添加到收藏夹，以验证 Upstash 存储是否正常工作。
